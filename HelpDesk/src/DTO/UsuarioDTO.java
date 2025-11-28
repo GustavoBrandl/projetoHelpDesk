@@ -1,8 +1,10 @@
+package DTO;
+
 import java.time.LocalDateTime;
 import ENUM.TipoUsuario;
 
-public class Usuario {
-	private int id;
+public class UsuarioDTO {
+	private Integer id;
 	private String username;
 	private String email;
 	private String password;
@@ -10,10 +12,10 @@ public class Usuario {
 	private boolean ativo = true;
 	private TipoUsuario tipo;
 	private LocalDateTime dataCriacao;
-	private Organizacao organizacao;
+	private OrganizacaoDTO organizacao;
 	
-	public Usuario() {}
-	public Usuario(int id, String username, String email, String password, boolean ativo, TipoUsuario tipo, LocalDateTime dataCriacao, Organizacao organizacao) {
+	public UsuarioDTO() {}
+	public UsuarioDTO(Integer id, String username, String email, String password, boolean ativo, TipoUsuario tipo, LocalDateTime dataCriacao, OrganizacaoDTO organizacao) {
 		setId(id);
 		setUsername(username);
 		setEmail(email);
@@ -27,8 +29,7 @@ public class Usuario {
 	public int getId() {
 		return id;
 	}
-	public void setId(int id) {
-		if (id > 0)
+	public void setId(Integer id) {
 			this.id = id;
 	}
 	public String getUsername() {
@@ -67,10 +68,10 @@ public class Usuario {
 	public void setTipo(TipoUsuario tipo) {
 		this.tipo = tipo;
 	}
-	public Organizacao getOrganizacao() {
+	public OrganizacaoDTO getOrganizacao() {
 		return organizacao;
 	}
-	public void setOrganizacao(Organizacao organizacao) {
+	public void setOrganizacao(OrganizacaoDTO organizacao) {
 		this.organizacao = organizacao;
 	}
 	public String getTelefone() {
@@ -82,7 +83,7 @@ public class Usuario {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Usuario [id=");
+		builder.append("UsuarioDTO [id=");
 		builder.append(id);
 		builder.append(", username=");
 		builder.append(username);

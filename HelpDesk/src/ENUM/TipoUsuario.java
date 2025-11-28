@@ -1,3 +1,4 @@
+package ENUM;
 
 public enum TipoUsuario {
     USUARIO(4),
@@ -18,4 +19,14 @@ public enum TipoUsuario {
     public boolean isMaiorOuIgual(TipoUsuario outro) {
         return this.id <= outro.id;
     }
+    
+    public static TipoUsuario fromId(int id) {
+        for (TipoUsuario t : TipoUsuario.values()) {
+            if (t.getId() == id) {
+                return t;
+            }
+        }
+        throw new IllegalArgumentException("TipoUsuario inválido: " + id);
+    }
+
 }

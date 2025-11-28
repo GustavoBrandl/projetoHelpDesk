@@ -6,5 +6,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="C:/Users/user/OneDrive - CENTRALTI/Área de Trabalho/MVC-Simples-JDBC-V1/MVC-Simples-JDBC-V1/src/lib/mysql-connector-java.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
