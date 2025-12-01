@@ -81,9 +81,13 @@ public class LoginPanel extends JPanel {
                 mainFrame.mostrarCadastro();
             }
         });
+        
+        System.out.println("✅ LoginPanel criado!");
     }
 
     private void fazerLogin() {
+        System.out.println("🔐 Tentando login...");
+        
         String email = usernameField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
 
@@ -97,7 +101,13 @@ public class LoginPanel extends JPanel {
             var usuarioController = controller.getUsuarioController();
             var usuarioLogado = usuarioController.autenticar(email, password);
             
+            System.out.println("🔍 Resultado autenticação: " + (usuarioLogado != null ? "SUCESSO" : "FALHA"));
+            
             if (usuarioLogado != null) {
+                System.out.println("✅ Usuário autenticado: " + usuarioLogado.getUsername());
+                System.out.println("📊 Tipo do usuário: " + usuarioLogado.getTipo());
+                System.out.println("🔢 ID do tipo: " + usuarioLogado.getTipo().getId());
+                
                 controller.setUsuarioLogado(usuarioLogado);
                 
                 JOptionPane.showMessageDialog(this, 
@@ -105,6 +115,8 @@ public class LoginPanel extends JPanel {
                     "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 
                 limparCampos();
+                
+                System.out.println("🔄 Chamando mainFrame.usuarioLogado()...");
                 mainFrame.usuarioLogado();
                 
             } else {
@@ -114,10 +126,11 @@ public class LoginPanel extends JPanel {
             }
             
         } catch (Exception e) {
+            System.out.println("❌ ERRO no login: " + e.getMessage());
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, 
                 "Erro: " + e.getMessage(), 
                 "Erro", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
         }
     }
 

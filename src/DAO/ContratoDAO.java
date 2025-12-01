@@ -93,7 +93,7 @@ public class ContratoDAO {
         }
     }
     
-    public boolean alterarCategoria(ContratoDTO contrato) {
+    public boolean alterarContrato(ContratoDTO contrato) {
         try {
             Connection conn = Conexao.conectar();
 

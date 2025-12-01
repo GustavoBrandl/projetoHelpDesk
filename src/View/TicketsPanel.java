@@ -10,6 +10,7 @@ import DTO.TicketDTO;
 import DTO.CategoriaDTO;
 import Controller.HelpDeskController;
 import Util.PermissaoUtil;
+import ENUM.TipoUsuario;
 
 public class TicketsPanel extends JPanel {
     private JTable ticketsTable;
@@ -195,12 +196,27 @@ public class TicketsPanel extends JPanel {
         var usuarioLogado = controller.getUsuarioLogado();
         
         if (usuarioLogado == null) {
+            System.out.println("DEBUG TicketsPanel: Usuário NÃO logado!");
             novoTicketButton.setEnabled(false);
             atenderButton.setEnabled(false);
             finalizarButton.setEnabled(false);
             gerenciarButton.setEnabled(false);
             return;
         }
+        
+        System.out.println("=========================================");
+        System.out.println("DEBUG TicketsPanel: Usuário logado: " + usuarioLogado.getUsername());
+        System.out.println("DEBUG TicketsPanel: Email: " + usuarioLogado.getEmail());
+        System.out.println("DEBUG TicketsPanel: Tipo do usuário: " + usuarioLogado.getTipo());
+        System.out.println("DEBUG TicketsPanel: ID do tipo: " + usuarioLogado.getTipo().getId());
+        System.out.println("DEBUG TicketsPanel: É ADMIN? " + (usuarioLogado.getTipo() == TipoUsuario.ADMIN));
+        System.out.println("DEBUG TicketsPanel: É TECNICO? " + (usuarioLogado.getTipo() == TipoUsuario.TECNICO));
+        
+        System.out.println("DEBUG TicketsPanel: podeCriarTicket: " + PermissaoUtil.podeCriarTicket(usuarioLogado));
+        System.out.println("DEBUG TicketsPanel: podeAtenderTickets: " + PermissaoUtil.podeAtenderTickets(usuarioLogado));
+        System.out.println("DEBUG TicketsPanel: podeGerenciarSistema: " + PermissaoUtil.podeGerenciarSistema(usuarioLogado));
+        System.out.println("DEBUG TicketsPanel: podeVerTodosTickets: " + PermissaoUtil.podeVerTodosTickets(usuarioLogado));
+        System.out.println("=========================================");
         
         novoTicketButton.setEnabled(PermissaoUtil.podeCriarTicket(usuarioLogado));
         atenderButton.setEnabled(PermissaoUtil.podeAtenderTickets(usuarioLogado));

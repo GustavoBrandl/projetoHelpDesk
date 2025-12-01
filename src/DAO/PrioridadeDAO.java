@@ -34,7 +34,7 @@ public class PrioridadeDAO {
     public boolean alterar(PrioridadeDTO prioridade) {
         try {
             Connection conn = Conexao.conectar();
-            String sql = "UPDATE " + NOMEDATABELA + " SET nome = ? valor = ? WHERE id = ?;";
+            String sql = "UPDATE " + NOMEDATABELA + " SET nome = ?, valor = ? WHERE id = ?;";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, prioridade.getNome());
             ps.setInt(2, prioridade.getValor());
@@ -177,7 +177,7 @@ public class PrioridadeDAO {
     public boolean incrementarNumeroTickets(Integer idCategoria) {
         try {
             Connection conn = Conexao.conectar();
-            String sql = "UPDATE categoria SET numeroTickets = numeroTickets + 1 WHERE id = ?";
+            String sql = "UPDATE prioridade SET numeroTickets = numeroTickets + 1 WHERE id = ?";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, idCategoria);
             ps.executeUpdate();

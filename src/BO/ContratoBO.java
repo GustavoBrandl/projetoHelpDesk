@@ -60,7 +60,7 @@ public class ContratoBO {
         }
 
         ContratoDAO contratosDAO = new ContratoDAO();
-        return contratosDAO.alterarCategoria(contrato);
+        return contratosDAO.alterarContrato(contrato);
     }
     
     public void listarContrato(Integer id) {

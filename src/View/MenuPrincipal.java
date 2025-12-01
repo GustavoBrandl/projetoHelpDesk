@@ -14,17 +14,56 @@ public class MenuPrincipal extends JMenuBar {
     public MenuPrincipal(HelpDeskController controller, HelpDeskUI mainFrame) {
         this.controller = controller;
         this.mainFrame = mainFrame;
-        criarMenu();
+        
+        System.out.println("=== DEBUG MENUPRINCIPAL ===");
+        System.out.println("Controller: " + controller);
+        System.out.println("MainFrame: " + mainFrame);
+        
+        UsuarioDTO usuario = controller.getUsuarioLogado();
+        System.out.println("Usuário do controller: " + usuario);
+        
+        if (usuario == null) {
+            System.out.println("❌ ERRO: Usuário é NULL no MenuPrincipal!");
+            criarMenuFake(); // Menu temporário para teste
+        } else {
+            System.out.println("✅ Usuário encontrado: " + usuario.getUsername());
+            System.out.println("Tipo: " + usuario.getTipo());
+            System.out.println("ID Tipo: " + usuario.getTipo().getId());
+            criarMenuReal(usuario);
+        }
     }
     
-    private void criarMenu() {
-        UsuarioDTO usuario = controller.getUsuarioLogado();
-        if (usuario == null) return;
+    private void criarMenuFake() {
+        System.out.println("Criando menu fake para teste...");
+        
+        JMenu menuTeste = new JMenu("TESTE");
+        JMenuItem item1 = new JMenuItem("Item 1");
+        JMenuItem item2 = new JMenuItem("Item 2");
+        
+        menuTeste.add(item1);
+        menuTeste.add(item2);
+        add(menuTeste);
+        
+        JMenu menuSair = new JMenu("SAIR");
+        JMenuItem sair = new JMenuItem("Sair");
+        sair.addActionListener(e -> {
+            if (mainFrame != null) mainFrame.mostrarLogin();
+        });
+        menuSair.add(sair);
+        add(menuSair);
+        
+        System.out.println("✅ Menu fake criado!");
+    }
+    
+    private void criarMenuReal(UsuarioDTO usuario) {
+        System.out.println("Criando menu real...");
+        
+        boolean podeGerenciar = PermissaoUtil.podeGerenciarSistema(usuario);
+        System.out.println("podeGerenciarSistema: " + podeGerenciar);
         
         JMenu menuTickets = new JMenu("Tickets");
         JMenuItem itemNovoTicket = new JMenuItem("Novo Ticket");
         JMenuItem itemMeusTickets = new JMenuItem("Meus Tickets");
-        JMenuItem itemTodosTickets = new JMenuItem("Todos Tickets");
         
         itemNovoTicket.addActionListener(e -> {
             if (mainFrame != null) mainFrame.mostrarTickets();
@@ -34,113 +73,43 @@ public class MenuPrincipal extends JMenuBar {
             if (mainFrame != null) mainFrame.mostrarTickets();
         });
         
-        itemTodosTickets.addActionListener(e -> {
-            if (mainFrame != null) mainFrame.mostrarTickets();
-        });
-        
-        itemNovoTicket.setEnabled(PermissaoUtil.podeCriarTicket(usuario));
-        itemTodosTickets.setEnabled(PermissaoUtil.podeVerTodosTickets(usuario));
-        
         menuTickets.add(itemNovoTicket);
         menuTickets.add(itemMeusTickets);
-        menuTickets.addSeparator();
-        menuTickets.add(itemTodosTickets);
+        add(menuTickets);
         
-        if (PermissaoUtil.podeGerenciarSistema(usuario)) {
+        if (podeGerenciar) {
+            System.out.println("✅ Criando menu Gerenciar...");
             JMenu menuGerenciar = new JMenu("Gerenciar");
+            
             JMenuItem itemCategorias = new JMenuItem("Categorias");
-            JMenuItem itemPrioridades = new JMenuItem("Prioridades");
-            JMenuItem itemDepartamentos = new JMenuItem("Departamentos");
-            JMenuItem itemStatus = new JMenuItem("Status");
+            JMenuItem itemUsuarios = new JMenuItem("Usuários");
             
             itemCategorias.addActionListener(e -> {
                 if (mainFrame != null) mainFrame.mostrarCategorias();
             });
             
-            itemPrioridades.addActionListener(e -> {
-                if (mainFrame != null) mainFrame.mostrarPrioridades();
-            });
-            
-            itemDepartamentos.addActionListener(e -> {
-                if (mainFrame != null) mainFrame.mostrarDepartamentos();
-            });
-            
-            itemStatus.addActionListener(e -> {
-                JOptionPane.showMessageDialog(mainFrame, 
-                    "Tela de Status em desenvolvimento.", 
-                    "Em desenvolvimento", JOptionPane.INFORMATION_MESSAGE);
+            itemUsuarios.addActionListener(e -> {
+                if (mainFrame != null) mainFrame.mostrarUsuarios();
             });
             
             menuGerenciar.add(itemCategorias);
-            menuGerenciar.add(itemPrioridades);
-            menuGerenciar.add(itemDepartamentos);
-            menuGerenciar.add(itemStatus);
-            
-            if (usuario.getTipo() == TipoUsuario.ADMIN || 
-                usuario.getTipo() == TipoUsuario.TECNICO) {
-                JMenuItem itemUsuarios = new JMenuItem("Usuários");
-                itemUsuarios.addActionListener(e -> {
-                    JOptionPane.showMessageDialog(mainFrame, 
-                        "Tela de Usuários em desenvolvimento.", 
-                        "Em desenvolvimento", JOptionPane.INFORMATION_MESSAGE);
-                });
-                menuGerenciar.add(itemUsuarios);
-            }
-            
+            menuGerenciar.add(itemUsuarios);
             add(menuGerenciar);
+        } else {
+            System.out.println("❌ Não pode gerenciar!");
         }
         
-        if (PermissaoUtil.podeVerRelatorios(usuario)) {
-            JMenu menuRelatorios = new JMenu("Relatórios");
-            JMenuItem itemRelTickets = new JMenuItem("Relatório de Tickets");
-            JMenuItem itemRelFaturamento = new JMenuItem("Faturamento");
-            
-            itemRelTickets.addActionListener(e -> {
-                JOptionPane.showMessageDialog(mainFrame, 
-                    "Relatórios em desenvolvimento.", 
-                    "Em desenvolvimento", JOptionPane.INFORMATION_MESSAGE);
-            });
-            
-            itemRelFaturamento.addActionListener(e -> {
-                JOptionPane.showMessageDialog(mainFrame, 
-                    "Faturamento em desenvolvimento.", 
-                    "Em desenvolvimento", JOptionPane.INFORMATION_MESSAGE);
-            });
-            
-            if (usuario.getTipo() == TipoUsuario.GERENTE) {
-                itemRelFaturamento.setText("Faturamento (Minha Org)");
-            }
-            
-            menuRelatorios.add(itemRelTickets);
-            menuRelatorios.add(itemRelFaturamento);
-            add(menuRelatorios);
-        }
-        
-        add(menuTickets);
-        
-        add(Box.createHorizontalGlue());
-        
-        JMenu menuUsuario = new JMenu(usuario.getUsername() + " (" + 
-            PermissaoUtil.getDescricaoTipo(usuario.getTipo()) + ")");
-        
-        JMenuItem itemPerfil = new JMenuItem("Meu Perfil");
+        JMenu menuUsuario = new JMenu(usuario.getUsername());
         JMenuItem itemSair = new JMenuItem("Sair");
-        
-        itemPerfil.addActionListener(e -> {
-            JOptionPane.showMessageDialog(mainFrame, 
-                "Perfil em desenvolvimento.", 
-                "Em desenvolvimento", JOptionPane.INFORMATION_MESSAGE);
-        });
         
         itemSair.addActionListener(e -> {
             controller.logout();
             if (mainFrame != null) mainFrame.mostrarLogin();
         });
         
-        menuUsuario.add(itemPerfil);
-        menuUsuario.addSeparator();
         menuUsuario.add(itemSair);
-        
         add(menuUsuario);
+        
+        System.out.println("✅ Menu real criado!");
     }
 }

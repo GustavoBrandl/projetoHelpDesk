@@ -6,36 +6,75 @@ import DTO.UsuarioDTO;
 public class PermissaoUtil {
     
     public static boolean podeTudo(UsuarioDTO usuario) {
-        return usuario != null && usuario.getTipo() == TipoUsuario.ADMIN;
+        if (usuario == null) {
+            System.out.println("❌ PermissaoUtil.podeTudo: usuario é NULL");
+            return false;
+        }
+        boolean resultado = usuario.getTipo() == TipoUsuario.ADMIN;
+        System.out.println("🔐 PermissaoUtil.podeTudo: " + resultado + " (Tipo=" + usuario.getTipo() + ", ID=" + usuario.getTipo().getId() + ")");
+        return resultado;
     }
     
     public static boolean podeGerenciarSistema(UsuarioDTO usuario) {
-        return usuario != null && 
-               (usuario.getTipo() == TipoUsuario.ADMIN || 
-                usuario.getTipo() == TipoUsuario.TECNICO);
+        if (usuario == null) {
+            System.out.println("❌ PermissaoUtil.podeGerenciarSistema: usuario é NULL");
+            return false;
+        }
+        
+        boolean resultado = usuario.getTipo() == TipoUsuario.ADMIN || 
+                           usuario.getTipo() == TipoUsuario.TECNICO;
+        
+        System.out.println("🔐 PermissaoUtil.podeGerenciarSistema: " + resultado);
+        System.out.println("   → Tipo usuário: " + usuario.getTipo());
+        System.out.println("   → ID tipo: " + usuario.getTipo().getId());
+        System.out.println("   → É ADMIN? " + (usuario.getTipo() == TipoUsuario.ADMIN));
+        System.out.println("   → É TECNICO? " + (usuario.getTipo() == TipoUsuario.TECNICO));
+        System.out.println("   → ADMIN ID: " + TipoUsuario.ADMIN.getId());
+        System.out.println("   → TECNICO ID: " + TipoUsuario.TECNICO.getId());
+        
+        return resultado;
     }
     
     public static boolean podeAtenderTickets(UsuarioDTO usuario) {
-        return usuario != null && 
-               (usuario.getTipo() == TipoUsuario.ADMIN || 
-                usuario.getTipo() == TipoUsuario.TECNICO);
+        if (usuario == null) {
+            System.out.println("❌ PermissaoUtil.podeAtenderTickets: usuario é NULL");
+            return false;
+        }
+        
+        boolean resultado = usuario.getTipo() == TipoUsuario.ADMIN || 
+                           usuario.getTipo() == TipoUsuario.TECNICO;
+        
+        System.out.println("🔐 PermissaoUtil.podeAtenderTickets: " + resultado + " (Tipo=" + usuario.getTipo() + ")");
+        return resultado;
     }
     
     public static boolean podeVerTodosTickets(UsuarioDTO usuario) {
-        return usuario != null && 
-               (usuario.getTipo() == TipoUsuario.ADMIN || 
-                usuario.getTipo() == TipoUsuario.TECNICO);
+        if (usuario == null) {
+            System.out.println("❌ PermissaoUtil.podeVerTodosTickets: usuario é NULL");
+            return false;
+        }
+        
+        boolean resultado = usuario.getTipo() == TipoUsuario.ADMIN || 
+                           usuario.getTipo() == TipoUsuario.TECNICO;
+        
+        System.out.println("🔐 PermissaoUtil.podeVerTodosTickets: " + resultado + " (Tipo=" + usuario.getTipo() + ")");
+        return resultado;
     }
     
     public static boolean podeVerOrgTickets(UsuarioDTO usuario) {
-        return usuario != null && 
-               (usuario.getTipo() == TipoUsuario.ADMIN || 
-                usuario.getTipo() == TipoUsuario.TECNICO ||
-                usuario.getTipo() == TipoUsuario.GERENTE);
+        if (usuario == null) return false;
+        
+        return usuario.getTipo() == TipoUsuario.ADMIN || 
+               usuario.getTipo() == TipoUsuario.TECNICO ||
+               usuario.getTipo() == TipoUsuario.GERENTE;
     }
     
     public static boolean podeCriarTicket(UsuarioDTO usuario) {
-        return usuario != null && usuario.isAtivo();
+        if (usuario == null) return false;
+        
+        boolean resultado = usuario.isAtivo();
+        System.out.println("🔐 PermissaoUtil.podeCriarTicket: " + resultado + " (Ativo=" + usuario.isAtivo() + ")");
+        return resultado;
     }
     
     public static boolean podeGerenciarUsuarios(UsuarioDTO editor, UsuarioDTO alvo) {
@@ -52,20 +91,24 @@ public class PermissaoUtil {
     }
     
     public static boolean podeVerRelatorios(UsuarioDTO usuario) {
-        return usuario != null && 
-               (usuario.getTipo() == TipoUsuario.ADMIN || 
-                usuario.getTipo() == TipoUsuario.TECNICO ||
-                usuario.getTipo() == TipoUsuario.GERENTE);
+        if (usuario == null) return false;
+        
+        return usuario.getTipo() == TipoUsuario.ADMIN || 
+               usuario.getTipo() == TipoUsuario.TECNICO ||
+               usuario.getTipo() == TipoUsuario.GERENTE;
     }
     
     public static boolean podeGerarFaturamento(UsuarioDTO usuario) {
-        return usuario != null && 
-               (usuario.getTipo() == TipoUsuario.ADMIN || 
-                usuario.getTipo() == TipoUsuario.TECNICO ||
-                usuario.getTipo() == TipoUsuario.GERENTE);
+        if (usuario == null) return false;
+        
+        return usuario.getTipo() == TipoUsuario.ADMIN || 
+               usuario.getTipo() == TipoUsuario.TECNICO ||
+               usuario.getTipo() == TipoUsuario.GERENTE;
     }
     
     public static String getDescricaoTipo(TipoUsuario tipo) {
+        if (tipo == null) return "Desconhecido";
+        
         switch (tipo) {
             case ADMIN: return "Administrador";
             case TECNICO: return "Técnico";
