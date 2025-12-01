@@ -376,4 +376,8 @@ public class UsuarioGerenciamentoPanel extends JPanel {
             }
         }
     }
+    public void atualizar() {
+        carregarUsuarios();
+        atualizarBotoes();
+    }
 }

@@ -354,4 +354,8 @@ public class PrioridadesPanel extends JPanel {
                 "Em desenvolvimento", JOptionPane.INFORMATION_MESSAGE);
         }
     }
+    public void atualizar() {
+        carregarPrioridades();
+        atualizarBotoes();
+    }
 }

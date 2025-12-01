@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import DTO.OrganizacaoDTO;
-import DTO.PrioridadeDTO;
 import Conexao.Conexao;
 
 public class OrganizacaoDAO {

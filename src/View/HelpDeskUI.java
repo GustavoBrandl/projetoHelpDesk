@@ -3,11 +3,13 @@ package View;
 import javax.swing.*;
 import java.awt.*;
 import Controller.HelpDeskController;
+import DTO.UsuarioDTO;
 
 public class HelpDeskUI extends JFrame {
     private JPanel mainPanel;
     private CardLayout cardLayout;
     private HelpDeskController controller;
+    private UsuarioDTO usuarioLogado;
     
     public HelpDeskUI() {
         controller = HelpDeskController.getInstance();
@@ -28,6 +30,7 @@ public class HelpDeskUI extends JFrame {
         mainPanel.add(new PrioridadesPanel(this), "prioridades");
         mainPanel.add(new DepartamentoView(this), "departamentos");
         mainPanel.add(new UsuarioGerenciamentoPanel(this), "usuarios");
+        mainPanel.add(new StatusPanel(this), "status");
 
         add(mainPanel);
         
@@ -40,21 +43,12 @@ public class HelpDeskUI extends JFrame {
     }
 
     public void usuarioLogado() {
-        System.out.println("=== usuarioLogado() CHAMADO ===");
-        System.out.println("Controller: " + controller);
-        System.out.println("Usuário logado: " + controller.getUsuarioLogado());
-        
         setJMenuBar(null);
-        
         JMenuBar menuBar = new MenuPrincipal(controller, this);
         setJMenuBar(menuBar);
-        
         revalidate();
         repaint();
-        
         cardLayout.show(mainPanel, "tickets");
-        
-        System.out.println("✅ Menu configurado!");
     }
 
     public void mostrarLogin() {
@@ -87,11 +81,20 @@ public class HelpDeskUI extends JFrame {
     public void mostrarUsuarios() {
         cardLayout.show(mainPanel, "usuarios");
     }
+    
+    public void mostrarStatus() {
+        cardLayout.show(mainPanel, "status");
+    }
+
+    public void setUsuarioLogado(UsuarioDTO usuario) {
+        this.usuarioLogado = usuario;
+    }
+
+    public UsuarioDTO getUsuarioLogado() {
+        return this.usuarioLogado;
+    }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            System.out.println("🚀 INICIANDO APLICAÇÃO...");
-            new HelpDeskUI();
-        });
+        SwingUtilities.invokeLater(() -> new HelpDeskUI());
     }
 }

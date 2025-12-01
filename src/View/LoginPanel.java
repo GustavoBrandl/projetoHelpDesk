@@ -109,6 +109,8 @@ public class LoginPanel extends JPanel {
                 System.out.println("🔢 ID do tipo: " + usuarioLogado.getTipo().getId());
                 
                 controller.setUsuarioLogado(usuarioLogado);
+                mainFrame.setUsuarioLogado(usuarioLogado);
+
                 
                 JOptionPane.showMessageDialog(this, 
                     "Login realizado com sucesso!\nBem-vindo, " + usuarioLogado.getUsername(), 

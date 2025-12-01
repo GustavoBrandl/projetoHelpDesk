@@ -405,4 +405,8 @@ public class TicketsPanel extends JPanel {
             ex.printStackTrace();
         }
     }
+    public void atualizar() {
+        carregarTickets();
+        atualizarBotoes();
+    }
 }
