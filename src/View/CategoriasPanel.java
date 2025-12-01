@@ -6,24 +6,26 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-import BO.CategoriaBO;
 import DTO.CategoriaDTO;
+import DTO.DepartamentoDTO;
+import Controller.HelpDeskController;
+import Util.PermissaoUtil;
 
 public class CategoriasPanel extends JPanel {
     private JTable categoriasTable;
     private DefaultTableModel tableModel;
     private JButton novaButton;
+    private JButton editarButton;
+    private JButton excluirButton;
     private JButton voltarButton;
     private HelpDeskUI mainFrame;
-    private CategoriaBO categoriaBO;
+    private JComboBox<DepartamentoDTO> comboDepartamento;
 
     public CategoriasPanel(HelpDeskUI mainFrame) {
         this.mainFrame = mainFrame;
-        this.categoriaBO = new CategoriaBO();
         setLayout(new BorderLayout());
         setBackground(new Color(240, 240, 240));
 
-        // Painel Superior
         JPanel topPanel = new JPanel();
         topPanel.setBackground(new Color(0, 150, 136));
         JLabel titleLabel = new JLabel("GERENCIAR CATEGORIAS");
@@ -32,8 +34,7 @@ public class CategoriasPanel extends JPanel {
         topPanel.add(titleLabel);
         add(topPanel, BorderLayout.NORTH);
 
-        // Tabela
-        String[] colunas = {"ID", "Nome", "Total Tickets"};
+        String[] colunas = {"ID", "Nome", "Total Tickets", "Departamento"};
         tableModel = new DefaultTableModel(colunas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -46,7 +47,6 @@ public class CategoriasPanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(categoriasTable);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Painel de Botões
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         bottomPanel.setBackground(new Color(240, 240, 240));
 
@@ -57,6 +57,20 @@ public class CategoriasPanel extends JPanel {
         novaButton.setFocusPainted(false);
         bottomPanel.add(novaButton);
 
+        editarButton = new JButton("EDITAR");
+        editarButton.setFont(new Font("Arial", Font.BOLD, 12));
+        editarButton.setBackground(new Color(33, 150, 243));
+        editarButton.setForeground(Color.WHITE);
+        editarButton.setFocusPainted(false);
+        bottomPanel.add(editarButton);
+
+        excluirButton = new JButton("EXCLUIR");
+        excluirButton.setFont(new Font("Arial", Font.BOLD, 12));
+        excluirButton.setBackground(new Color(244, 67, 54));
+        excluirButton.setForeground(Color.WHITE);
+        excluirButton.setFocusPainted(false);
+        bottomPanel.add(excluirButton);
+
         voltarButton = new JButton("VOLTAR");
         voltarButton.setFont(new Font("Arial", Font.BOLD, 12));
         voltarButton.setBackground(new Color(158, 158, 158));
@@ -66,11 +80,24 @@ public class CategoriasPanel extends JPanel {
 
         add(bottomPanel, BorderLayout.SOUTH);
 
-        // Ações dos botões
         novaButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 criarNovaCategoria();
+            }
+        });
+
+        editarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                editarCategoriaSelecionada();
+            }
+        });
+
+        excluirButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                excluirCategoriaSelecionada();
             }
         });
 
@@ -82,47 +109,203 @@ public class CategoriasPanel extends JPanel {
         });
 
         carregarCategorias();
+        atualizarBotoes();
     }
 
     private void carregarCategorias() {
         tableModel.setRowCount(0);
         try {
-            List<CategoriaDTO> categorias = categoriaBO.pesquisarTodos();
+            var controller = mainFrame.getController();
+            var usuarioLogado = controller.getUsuarioLogado();
+            
+            if (usuarioLogado == null || !PermissaoUtil.podeGerenciarSistema(usuarioLogado)) {
+                tableModel.addRow(new Object[]{"", "Acesso não autorizado", "", ""});
+                return;
+            }
+            
+            var categoriaController = controller.getCategoriaController();
+            List<CategoriaDTO> categorias = categoriaController.listarCategorias();
+            
             if (categorias != null && !categorias.isEmpty()) {
                 for (CategoriaDTO categoria : categorias) {
+                    String departamentoNome = categoria.getDepartamento() != null ? 
+                        categoria.getDepartamento().getNome() : "N/A";
+                    
                     tableModel.addRow(new Object[]{
                         categoria.getId(),
                         categoria.getNome(),
-                        categoria.getNumeroTicket()
+                        categoria.getNumeroTicket(),
+                        departamentoNome
                     });
                 }
+            } else {
+                tableModel.addRow(new Object[]{"", "Nenhuma categoria encontrada", "", ""});
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar categorias: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, 
+                "Erro ao carregar categorias: " + e.getMessage(), 
+                "Erro", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }
 
-    private void criarNovaCategoria() {
-        String nome = JOptionPane.showInputDialog(this, "Nome da categoria:", "Nova Categoria", JOptionPane.PLAIN_MESSAGE);
-        if (nome == null || nome.trim().isEmpty()) {
-            return;
-        }
+    private void atualizarBotoes() {
+        var controller = mainFrame.getController();
+        var usuarioLogado = controller.getUsuarioLogado();
+        
+        boolean podeGerenciar = PermissaoUtil.podeGerenciarSistema(usuarioLogado);
+        int linhaSelecionada = categoriasTable.getSelectedRow();
+        
+        novaButton.setEnabled(podeGerenciar);
+        editarButton.setEnabled(podeGerenciar && linhaSelecionada >= 0);
+        excluirButton.setEnabled(podeGerenciar && linhaSelecionada >= 0);
+    }
 
-        String deptStr = JOptionPane.showInputDialog(this, "ID do Departamento:", "Nova Categoria", JOptionPane.PLAIN_MESSAGE);
-        if (deptStr == null || deptStr.trim().isEmpty()) {
-            return;
-        }
-
-        try {
-            int deptId = Integer.parseInt(deptStr);
-            if (categoriaBO.criarCategoria(nome, deptId)) {
-                JOptionPane.showMessageDialog(this, "Categoria criada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                carregarCategorias();
-            } else {
-                JOptionPane.showMessageDialog(this, "Erro ao criar categoria!", "Erro", JOptionPane.ERROR_MESSAGE);
+    private Integer getCategoriaIdSelecionada() {
+        int linha = categoriasTable.getSelectedRow();
+        if (linha >= 0) {
+            Object idObj = tableModel.getValueAt(linha, 0);
+            if (idObj instanceof Integer) return (Integer) idObj;
+            if (idObj instanceof String) {
+                try {
+                    return Integer.parseInt((String) idObj);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
             }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "ID de departamento inválido!", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+        return null;
+    }
+
+    private void criarNovaCategoria() {
+        var controller = mainFrame.getController();
+        var usuarioLogado = controller.getUsuarioLogado();
+        
+        if (!PermissaoUtil.podeGerenciarSistema(usuarioLogado)) {
+            JOptionPane.showMessageDialog(this, 
+                "Você não tem permissão para criar categorias.", 
+                "Permissão Negada", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        JTextField nomeField = new JTextField();
+        comboDepartamento = new JComboBox<>();
+        
+        var departamentoController = controller.getDepartamentoController();
+        List<DepartamentoDTO> departamentos = departamentoController.listarDepartamentos();
+        
+        if (departamentos != null && !departamentos.isEmpty()) {
+            for (DepartamentoDTO dept : departamentos) {
+                comboDepartamento.addItem(dept);
+            }
+        } else {
+            comboDepartamento.addItem(new DepartamentoDTO(0, "Nenhum departamento"));
+        }
+        
+        panel.add(new JLabel("Nome:"));
+        panel.add(nomeField);
+        panel.add(new JLabel("Departamento:"));
+        panel.add(comboDepartamento);
+        
+        int result = JOptionPane.showConfirmDialog(this, panel, 
+            "Nova Categoria", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        
+        if (result == JOptionPane.OK_OPTION) {
+            String nome = nomeField.getText().trim();
+            DepartamentoDTO departamento = (DepartamentoDTO) comboDepartamento.getSelectedItem();
+            
+            if (nome.isEmpty()) {
+                JOptionPane.showMessageDialog(this, 
+                    "Informe o nome da categoria.", 
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            if (departamento == null || departamento.getId() == 0) {
+                JOptionPane.showMessageDialog(this, 
+                    "Selecione um departamento válido.", 
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            try {
+                var categoriaController = controller.getCategoriaController();
+                boolean sucesso = categoriaController.criarCategoria(nome, departamento.getId());
+                
+                if (sucesso) {
+                    JOptionPane.showMessageDialog(this, 
+                        "Categoria criada com sucesso!", 
+                        "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                    carregarCategorias();
+                } else {
+                    JOptionPane.showMessageDialog(this, 
+                        "Erro ao criar categoria.", 
+                        "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, 
+                    "Erro: " + e.getMessage(), 
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void editarCategoriaSelecionada() {
+        Integer categoriaId = getCategoriaIdSelecionada();
+        if (categoriaId == null) {
+            JOptionPane.showMessageDialog(this, 
+                "Selecione uma categoria para editar.", 
+                "Atenção", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        var controller = mainFrame.getController();
+        var usuarioLogado = controller.getUsuarioLogado();
+        
+        if (!PermissaoUtil.podeGerenciarSistema(usuarioLogado)) {
+            JOptionPane.showMessageDialog(this, 
+                "Você não tem permissão para editar categorias.", 
+                "Permissão Negada", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        JOptionPane.showMessageDialog(this, 
+            "Funcionalidade de edição em desenvolvimento.", 
+            "Em desenvolvimento", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void excluirCategoriaSelecionada() {
+        Integer categoriaId = getCategoriaIdSelecionada();
+        if (categoriaId == null) {
+            JOptionPane.showMessageDialog(this, 
+                "Selecione uma categoria para excluir.", 
+                "Atenção", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        var controller = mainFrame.getController();
+        var usuarioLogado = controller.getUsuarioLogado();
+        
+        if (!PermissaoUtil.podeGerenciarSistema(usuarioLogado)) {
+            JOptionPane.showMessageDialog(this, 
+                "Você não tem permissão para excluir categorias.", 
+                "Permissão Negada", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Tem certeza que deseja excluir esta categoria?",
+            "Confirmar Exclusão",
+            JOptionPane.YES_NO_OPTION);
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            JOptionPane.showMessageDialog(this, 
+                "Funcionalidade de exclusão em desenvolvimento.", 
+                "Em desenvolvimento", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 }

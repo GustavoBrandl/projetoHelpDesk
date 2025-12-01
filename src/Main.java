@@ -1,4 +1,5 @@
 
+import View.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +9,8 @@ import DTO.*;
 public class Main {
 
 	public static void main(String[] args) {
+		
+		new HelpDeskUI();
 		
 		DepartamentoBO departamentoBO = new DepartamentoBO();
 		/*

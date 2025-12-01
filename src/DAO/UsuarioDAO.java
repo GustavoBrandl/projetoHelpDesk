@@ -74,9 +74,10 @@ public class UsuarioDAO {
     public List<UsuarioDTO> pesquisarTodos() {
         try {
             Connection conn = Conexao.conectar();
-            String sql = "SELECT u.id, u.username, u.email, u.telefone, u.ativo, u.tipo, u.dataCriacao, o.id, o.nome, o.dataCriacao " +
-                         "FROM " + NOMEDATABELA + " u " +
-                         "INNER JOIN organizacao o ON u.fk_organizacao_usuario = o.id";
+            String sql = "SELECT u.id, u.username, u.email, u.password, u.telefone, u.ativo, u.tipo, u.dataCriacao, " +
+                    "o.id, o.nome, o.dominio, o.dataCriacao " +
+                    "FROM " + NOMEDATABELA + " u " +
+                    "INNER JOIN organizacao o ON u.fk_organizacao_usuario = o.id";
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             List<UsuarioDTO> lista = montarLista(rs);
@@ -95,18 +96,21 @@ public class UsuarioDAO {
         try {
             while (rs.next()) {
                 OrganizacaoDTO org = new OrganizacaoDTO();
-                org.setId(rs.getInt(8));
-                org.setNome(rs.getString(9));
-                org.setDataCriacao(rs.getTimestamp(10).toLocalDateTime());;
+                org.setId(rs.getInt(9));
+                org.setNome(rs.getString(10));  
+                org.setDominio(rs.getString(11)); 
+                org.setDataCriacao(rs.getTimestamp(12).toLocalDateTime()); 
+
                 UsuarioDTO user = new UsuarioDTO();
-                user.setId(rs.getInt(1));
-                user.setUsername(rs.getString(2));
-                user.setEmail(rs.getString(3));
-                user.setTelefone(rs.getString(4));
-                user.setAtivo(rs.getBoolean(5));
-                user.setTipo(TipoUsuario.fromId(rs.getInt(6)));
-                user.setDataCriacao(rs.getTimestamp(7).toLocalDateTime());
-               user.setOrganizacao(org);
+                user.setId(rs.getInt(1));           
+                user.setUsername(rs.getString(2));  
+                user.setEmail(rs.getString(3));     
+                user.setPassword(rs.getString(4));  
+                user.setTelefone(rs.getString(5));  
+                user.setAtivo(rs.getBoolean(6));    
+                user.setTipo(TipoUsuario.fromId(rs.getInt(7))); 
+                user.setDataCriacao(rs.getTimestamp(8).toLocalDateTime()); 
+                user.setOrganizacao(org);
 
                 listObj.add(user);
             }

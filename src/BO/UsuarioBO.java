@@ -95,10 +95,48 @@ public class UsuarioBO {
     	}
     }
     
+    public UsuarioDTO autenticar(String email, String senha) {
+        try {
+            System.out.println("DEBUG autenticar: Email=" + email + ", Senha=" + senha);
+            
+            List<UsuarioDTO> todosUsuarios = pesquisarTodos();
+            
+            if (todosUsuarios == null) {
+                System.out.println("DEBUG: Lista de usuários é NULL");
+                return null;
+            }
+            
+            System.out.println("DEBUG: Total de usuários no BD: " + todosUsuarios.size());
+            
+            for (UsuarioDTO usuario : todosUsuarios) {
+                System.out.println("DEBUG: Comparando com -> EmailBD=" + usuario.getEmail() + 
+                                 ", SenhaBD=" + usuario.getPassword() + 
+                                 ", Ativo=" + usuario.isAtivo());
+                
+                if (usuario.getEmail() != null && 
+                    usuario.getEmail().equalsIgnoreCase(email.trim()) &&
+                    usuario.getPassword() != null &&
+                    usuario.getPassword().equals(senha.trim()) &&
+                    usuario.isAtivo()) {
+                    
+                    System.out.println("DEBUG: ✅ Usuário autenticado: " + usuario.getUsername());
+                    return usuario;
+                }
+            }
+            
+            System.out.println("DEBUG: ❌ Nenhum usuário encontrado com estas credenciais");
+            return null;
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: ❌ Erro na autenticação:");
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public boolean ativarDesativar(int id) {
         UsuarioDAO usuariosDAO = new UsuarioDAO();
         return usuariosDAO.ativarDesativar(id);
     }
-
 
 }

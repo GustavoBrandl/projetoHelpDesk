@@ -15,21 +15,32 @@ public class OrganizacaoDAO {
 	final String NOMEDATABELA = "organizacao";
 	
 	public boolean inserir(OrganizacaoDTO organizacao) {
-		try {
-			Connection conn = Conexao.conectar();
-			String sql = "INSERT INTO " + NOMEDATABELA + " (nome, dominio) VALUES (?, ?)";
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString (1, organizacao.getNome());
-			ps.setString(2, organizacao.getDominio());
-			ps.executeUpdate();
-			ps.close();
-			conn.close();
-			return true;
-		} catch (Exception e){
-			e.printStackTrace();
-			System.out.println("ERRO COMEÇOU AQUI DAO");
-            return false;
-		}
+	    try {
+	        Connection conn = Conexao.conectar();
+	        System.out.println("DEBUG: Conexão OK? " + (conn != null));
+	        
+	        String sql = "INSERT INTO " + NOMEDATABELA + " (nome, dominio) VALUES (?, ?)";
+	        System.out.println("DEBUG: SQL: " + sql);
+	        
+	        PreparedStatement ps = conn.prepareStatement(sql);
+	        ps.setString(1, organizacao.getNome());
+	        ps.setString(2, organizacao.getDominio());
+	        
+	        System.out.println("DEBUG: Nome: " + organizacao.getNome());
+	        System.out.println("DEBUG: Dominio: " + organizacao.getDominio());
+	        
+	        int rows = ps.executeUpdate();
+	        System.out.println("DEBUG: Linhas afetadas: " + rows);
+	        
+	        ps.close();
+	        conn.close();
+	        return rows > 0;
+	        
+	    } catch (Exception e){
+	        System.out.println("DEBUG: ERRO NO INSERT:");
+	        e.printStackTrace();
+	        return false;
+	    }
 	}
     public boolean alterar(OrganizacaoDTO organizacao) {
         try {

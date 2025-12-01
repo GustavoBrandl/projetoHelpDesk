@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import Controller.HelpDeskController;
 
 public class LoginPanel extends JPanel {
     private JTextField usernameField;
@@ -21,7 +22,6 @@ public class LoginPanel extends JPanel {
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Título
         JLabel titleLabel = new JLabel("SISTEMA HELP DESK");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         gbc.gridx = 0;
@@ -29,7 +29,6 @@ public class LoginPanel extends JPanel {
         gbc.gridwidth = 2;
         add(titleLabel, gbc);
 
-        // Label e campo Username
         gbc.gridwidth = 1;
         gbc.gridy = 1;
         gbc.gridx = 0;
@@ -41,7 +40,6 @@ public class LoginPanel extends JPanel {
         usernameField = new JTextField(20);
         add(usernameField, gbc);
 
-        // Label e campo Password
         gbc.gridx = 0;
         gbc.gridy = 2;
         JLabel passwordLabel = new JLabel("Senha:");
@@ -52,7 +50,6 @@ public class LoginPanel extends JPanel {
         passwordField = new JPasswordField(20);
         add(passwordField, gbc);
 
-        // Botão Login
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.gridwidth = 2;
@@ -63,7 +60,6 @@ public class LoginPanel extends JPanel {
         loginButton.setFocusPainted(false);
         add(loginButton, gbc);
 
-        // Botão Cadastro
         gbc.gridy = 4;
         cadastroButton = new JButton("CRIAR CONTA");
         cadastroButton.setFont(new Font("Arial", Font.BOLD, 14));
@@ -72,7 +68,6 @@ public class LoginPanel extends JPanel {
         cadastroButton.setFocusPainted(false);
         add(cadastroButton, gbc);
 
-        // Ações dos botões
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -89,18 +84,41 @@ public class LoginPanel extends JPanel {
     }
 
     private void fazerLogin() {
-        String username = usernameField.getText().trim();
+        String email = usernameField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
 
-        if (username.isEmpty() || password.isEmpty()) {
+        if (email.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Preencha todos os campos!", "Erro", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Simular login bem-sucedido
-        JOptionPane.showMessageDialog(this, "Login realizado com sucesso!\nBem-vindo, " + username, "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-        limparCampos();
-        mainFrame.mostrarTickets();
+        try {
+            var controller = mainFrame.getController();
+            var usuarioController = controller.getUsuarioController();
+            var usuarioLogado = usuarioController.autenticar(email, password);
+            
+            if (usuarioLogado != null) {
+                controller.setUsuarioLogado(usuarioLogado);
+                
+                JOptionPane.showMessageDialog(this, 
+                    "Login realizado com sucesso!\nBem-vindo, " + usuarioLogado.getUsername(), 
+                    "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                
+                limparCampos();
+                mainFrame.usuarioLogado();
+                
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Email ou senha incorretos!\nOu usuário inativo.", 
+                    "Falha no Login", JOptionPane.ERROR_MESSAGE);
+            }
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, 
+                "Erro: " + e.getMessage(), 
+                "Erro", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 
     private void limparCampos() {

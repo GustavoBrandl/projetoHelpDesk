@@ -1,14 +1,15 @@
 package View;
 
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-import BO.TicketBO;
 import DTO.TicketDTO;
+import DTO.CategoriaDTO;
+import Controller.HelpDeskController;
+import Util.PermissaoUtil;
 
 public class TicketsPanel extends JPanel {
     private JTable ticketsTable;
@@ -17,16 +18,15 @@ public class TicketsPanel extends JPanel {
     private JButton atualizarButton;
     private JButton sairButton;
     private JButton gerenciarButton;
+    private JButton atenderButton;
+    private JButton finalizarButton;
     private HelpDeskUI mainFrame;
-    private TicketBO ticketBO;
 
     public TicketsPanel(HelpDeskUI mainFrame) {
         this.mainFrame = mainFrame;
-        this.ticketBO = new TicketBO();
         setLayout(new BorderLayout());
         setBackground(new Color(240, 240, 240));
 
-        // Painel Superior com Título
         JPanel topPanel = new JPanel();
         topPanel.setBackground(new Color(0, 150, 136));
         JLabel titleLabel = new JLabel("LISTA DE TICKETS");
@@ -35,8 +35,7 @@ public class TicketsPanel extends JPanel {
         topPanel.add(titleLabel);
         add(topPanel, BorderLayout.NORTH);
 
-        // Tabela de Tickets
-        String[] colunas = {"ID", "Sobre", "Descrição", "Categoria", "Prioridade", "Status"};
+        String[] colunas = {"ID", "Sobre", "Descrição", "Categoria", "Prioridade", "Status", "Solicitante"};
         tableModel = new DefaultTableModel(colunas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -49,7 +48,6 @@ public class TicketsPanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(ticketsTable);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Painel de Botões
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         bottomPanel.setBackground(new Color(240, 240, 240));
 
@@ -60,16 +58,30 @@ public class TicketsPanel extends JPanel {
         novoTicketButton.setFocusPainted(false);
         bottomPanel.add(novoTicketButton);
 
+        atenderButton = new JButton("ATENDER");
+        atenderButton.setFont(new Font("Arial", Font.BOLD, 12));
+        atenderButton.setBackground(new Color(33, 150, 243));
+        atenderButton.setForeground(Color.WHITE);
+        atenderButton.setFocusPainted(false);
+        bottomPanel.add(atenderButton);
+
+        finalizarButton = new JButton("FINALIZAR");
+        finalizarButton.setFont(new Font("Arial", Font.BOLD, 12));
+        finalizarButton.setBackground(new Color(255, 152, 0));
+        finalizarButton.setForeground(Color.WHITE);
+        finalizarButton.setFocusPainted(false);
+        bottomPanel.add(finalizarButton);
+
         atualizarButton = new JButton("ATUALIZAR");
         atualizarButton.setFont(new Font("Arial", Font.BOLD, 12));
-        atualizarButton.setBackground(new Color(33, 150, 243));
+        atualizarButton.setBackground(new Color(158, 158, 158));
         atualizarButton.setForeground(Color.WHITE);
         atualizarButton.setFocusPainted(false);
         bottomPanel.add(atualizarButton);
 
         gerenciarButton = new JButton("GERENCIAR");
         gerenciarButton.setFont(new Font("Arial", Font.BOLD, 12));
-        gerenciarButton.setBackground(new Color(255, 152, 0));
+        gerenciarButton.setBackground(new Color(156, 39, 176));
         gerenciarButton.setForeground(Color.WHITE);
         gerenciarButton.setFocusPainted(false);
         bottomPanel.add(gerenciarButton);
@@ -83,11 +95,24 @@ public class TicketsPanel extends JPanel {
 
         add(bottomPanel, BorderLayout.SOUTH);
 
-        // Ações dos botões
         novoTicketButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                criarNovoTicket();
+                criarNovoTicketReal();
+            }
+        });
+
+        atenderButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                atenderTicketSelecionado();
+            }
+        });
+
+        finalizarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                finalizarTicketSelecionado();
             }
         });
 
@@ -108,62 +133,260 @@ public class TicketsPanel extends JPanel {
         sairButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                mainFrame.getController().logout();
                 mainFrame.mostrarLogin();
             }
         });
 
-        // Carregar tickets ao inicializar
         carregarTickets();
+        atualizarBotoes();
     }
 
     private void carregarTickets() {
         tableModel.setRowCount(0);
         try {
-            List<TicketDTO> tickets = ticketBO.listarTodos();
+            var controller = mainFrame.getController();
+            var usuarioLogado = controller.getUsuarioLogado();
+            
+            if (usuarioLogado == null) {
+                tableModel.addRow(new Object[]{"", "Usuário não logado", "", "", "", "", ""});
+                return;
+            }
+            
+            var ticketController = controller.getTicketController();
+            List<TicketDTO> tickets = ticketController.listarTicketsPorUsuario(usuarioLogado);
+            
             if (tickets != null && !tickets.isEmpty()) {
                 for (TicketDTO ticket : tickets) {
-                    String categoriaNome = ticket.getCategoria() != null ? String.valueOf(ticket.getCategoria().getId()) : "N/A";
-                    String prioridadeNome = ticket.getPrioridade() != null ? String.valueOf(ticket.getPrioridade().getId()) : "N/A";
-                    String statusNome = ticket.getStatus() != null ? String.valueOf(ticket.getStatus().getId()) : "N/A";
+                    String categoriaNome = ticket.getCategoria() != null ? 
+                        ticket.getCategoria().getNome() : "N/A";
+                    String prioridadeNome = ticket.getPrioridade() != null ? 
+                        ticket.getPrioridade().getNome() : "N/A";
+                    String statusNome = ticket.getStatus() != null ? 
+                        ticket.getStatus().getNome() : "N/A";
+                    String solicitanteNome = ticket.getSolicitante() != null ? 
+                        ticket.getSolicitante().getUsername() : "N/A";
                     
                     tableModel.addRow(new Object[]{
                         ticket.getId(),
                         ticket.getSobre(),
-                        ticket.getDescricao() != null ? ticket.getDescricao().substring(0, Math.min(30, ticket.getDescricao().length())) + "..." : "",
+                        ticket.getDescricao() != null ? 
+                            ticket.getDescricao().substring(0, Math.min(30, ticket.getDescricao().length())) + "..." : "",
                         categoriaNome,
                         prioridadeNome,
-                        statusNome
+                        statusNome,
+                        solicitanteNome
                     });
                 }
+            } else {
+                tableModel.addRow(new Object[]{"", "Nenhum ticket encontrado", "", "", "", "", ""});
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar tickets: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, 
+                "Erro ao carregar tickets: " + e.getMessage(), 
+                "Erro", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+        atualizarBotoes();
+    }
+
+    private void atualizarBotoes() {
+        var controller = mainFrame.getController();
+        var usuarioLogado = controller.getUsuarioLogado();
+        
+        if (usuarioLogado == null) {
+            novoTicketButton.setEnabled(false);
+            atenderButton.setEnabled(false);
+            finalizarButton.setEnabled(false);
+            gerenciarButton.setEnabled(false);
+            return;
+        }
+        
+        novoTicketButton.setEnabled(PermissaoUtil.podeCriarTicket(usuarioLogado));
+        atenderButton.setEnabled(PermissaoUtil.podeAtenderTickets(usuarioLogado));
+        finalizarButton.setEnabled(PermissaoUtil.podeAtenderTickets(usuarioLogado));
+        gerenciarButton.setEnabled(PermissaoUtil.podeGerenciarSistema(usuarioLogado));
+        
+        int linhaSelecionada = ticketsTable.getSelectedRow();
+        atenderButton.setEnabled(atenderButton.isEnabled() && linhaSelecionada >= 0);
+        finalizarButton.setEnabled(finalizarButton.isEnabled() && linhaSelecionada >= 0);
+    }
+
+    private Integer getTicketIdSelecionado() {
+        int linha = ticketsTable.getSelectedRow();
+        if (linha >= 0) {
+            Object idObj = tableModel.getValueAt(linha, 0);
+            if (idObj instanceof Integer) return (Integer) idObj;
+            if (idObj instanceof String) {
+                try {
+                    return Integer.parseInt((String) idObj);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void atenderTicketSelecionado() {
+        Integer ticketId = getTicketIdSelecionado();
+        if (ticketId == null) {
+            JOptionPane.showMessageDialog(this, 
+                "Selecione um ticket para atender.", 
+                "Atenção", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        var controller = mainFrame.getController();
+        var usuarioLogado = controller.getUsuarioLogado();
+        
+        if (!PermissaoUtil.podeAtenderTickets(usuarioLogado)) {
+            JOptionPane.showMessageDialog(this, 
+                "Você não tem permissão para atender tickets.", 
+                "Permissão Negada", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Deseja atender o ticket #" + ticketId + "?",
+            "Confirmar Atendimento",
+            JOptionPane.YES_NO_OPTION);
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                var ticketController = controller.getTicketController();
+                boolean sucesso = ticketController.atenderTicket(ticketId, usuarioLogado);
+                
+                if (sucesso) {
+                    JOptionPane.showMessageDialog(this, 
+                        "Ticket atendido com sucesso!", 
+                        "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                    carregarTickets();
+                } else {
+                    JOptionPane.showMessageDialog(this, 
+                        "Erro ao atender ticket.", 
+                        "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, 
+                    "Erro: " + e.getMessage(), 
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
         }
     }
 
-    private void criarNovoTicket() {
-        String sobre = JOptionPane.showInputDialog(this, "Sobre do ticket:", "Novo Ticket", JOptionPane.PLAIN_MESSAGE);
-        if (sobre == null || sobre.trim().isEmpty()) {
+    private void finalizarTicketSelecionado() {
+        Integer ticketId = getTicketIdSelecionado();
+        if (ticketId == null) {
+            JOptionPane.showMessageDialog(this, 
+                "Selecione um ticket para finalizar.", 
+                "Atenção", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
-        String descricao = JOptionPane.showInputDialog(this, "Descrição do ticket:", "Novo Ticket", JOptionPane.PLAIN_MESSAGE);
-        if (descricao == null || descricao.trim().isEmpty()) {
+        
+        var controller = mainFrame.getController();
+        var usuarioLogado = controller.getUsuarioLogado();
+        
+        if (!PermissaoUtil.podeAtenderTickets(usuarioLogado)) {
+            JOptionPane.showMessageDialog(this, 
+                "Você não tem permissão para finalizar tickets.", 
+                "Permissão Negada", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Deseja finalizar o ticket #" + ticketId + "?",
+            "Confirmar Finalização",
+            JOptionPane.YES_NO_OPTION);
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                var ticketController = controller.getTicketController();
+                boolean sucesso = ticketController.finalizarTicket(ticketId, usuarioLogado);
+                
+                if (sucesso) {
+                    JOptionPane.showMessageDialog(this, 
+                        "Ticket finalizado com sucesso!", 
+                        "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                    carregarTickets();
+                } else {
+                    JOptionPane.showMessageDialog(this, 
+                        "Erro ao finalizar ticket.", 
+                        "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, 
+                    "Erro: " + e.getMessage(), 
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+    }
 
-        String categoriaStr = JOptionPane.showInputDialog(this, "ID da Categoria:", "Novo Ticket", JOptionPane.PLAIN_MESSAGE);
-        if (categoriaStr == null || categoriaStr.trim().isEmpty()) {
+    private void criarNovoTicketReal() {
+        var controller = mainFrame.getController();
+        var usuarioLogado = controller.getUsuarioLogado();
+        
+        if (usuarioLogado == null) {
+            JOptionPane.showMessageDialog(this, 
+                "Usuário não logado!", 
+                "Erro", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
+        
+        if (!PermissaoUtil.podeCriarTicket(usuarioLogado)) {
+            JOptionPane.showMessageDialog(this, 
+                "Você não tem permissão para criar tickets.", 
+                "Permissão Negada", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        NovoTicketDialogo dialog = new NovoTicketDialogo(
+            (Frame) SwingUtilities.getWindowAncestor(this), 
+            controller
+        );
+        dialog.setVisible(true);
+        
+        if (!dialog.isConfirmado()) {
+            return;
+        }
+        
         try {
-            int categoriaId = Integer.parseInt(categoriaStr);
-            // Aqui você implementaria a lógica de criar um novo ticket
-            JOptionPane.showMessageDialog(this, "Ticket criado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-            carregarTickets();
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "ID de categoria inválido!", "Erro", JOptionPane.ERROR_MESSAGE);
+            Integer categoriaId = dialog.getCategoriaId();
+            Integer prioridadeId = dialog.getPrioridadeId();
+            
+            if (categoriaId == null) {
+                JOptionPane.showMessageDialog(this, 
+                    "Selecione uma categoria válida.", 
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            var ticketController = controller.getTicketController();
+            boolean sucesso = ticketController.criarTicket(
+                dialog.getSobre(), 
+                dialog.getDescricao(), 
+                categoriaId,
+                prioridadeId,
+                usuarioLogado
+            );
+
+            if (sucesso) {
+                JOptionPane.showMessageDialog(this, 
+                    "Ticket criado com sucesso!", 
+                    "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                carregarTickets();
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Erro ao criar ticket.", 
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, 
+                "Erro: " + ex.getMessage(), 
+                "Erro", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
         }
     }
 }

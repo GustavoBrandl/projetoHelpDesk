@@ -2,6 +2,7 @@ package View;
 
 import javax.swing.*;
 import java.awt.*;
+import Controller.HelpDeskController;
 
 public class HelpDeskUI extends JFrame {
     private JPanel mainPanel;
@@ -11,39 +12,69 @@ public class HelpDeskUI extends JFrame {
     private TicketsPanel ticketsPanel;
     private CategoriasPanel categoriasPanel;
     private PrioridadesPanel prioridadesPanel;
-
+    private DepartamentoView departamentoView;
+    private UsuarioGerenciamentoPanel usuarioGerenciamentoPanel;
+    private HelpDeskController controller;
+    private MenuPrincipal menuPrincipal;
+    
     public HelpDeskUI() {
+        controller = HelpDeskController.getInstance();
+        
         setTitle("Sistema Help Desk");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
+        setSize(1000, 700);
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
 
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        // Inicializar painéis
         loginPanel = new LoginPanel(this);
         cadastroPanel = new CadastroPanel(this);
         ticketsPanel = new TicketsPanel(this);
         categoriasPanel = new CategoriasPanel(this);
         prioridadesPanel = new PrioridadesPanel(this);
+        departamentoView = new DepartamentoView(this);
+        usuarioGerenciamentoPanel = new UsuarioGerenciamentoPanel(this);
 
-        // Adicionar painéis ao mainPanel
         mainPanel.add(loginPanel, "login");
         mainPanel.add(cadastroPanel, "cadastro");
         mainPanel.add(ticketsPanel, "tickets");
         mainPanel.add(categoriasPanel, "categorias");
         mainPanel.add(prioridadesPanel, "prioridades");
+        mainPanel.add(departamentoView, "departamentos");
+        mainPanel.add(usuarioGerenciamentoPanel, "usuarios");
 
         add(mainPanel);
         setVisible(true);
 
-        // Mostrar tela de login
         mostrarLogin();
     }
 
+    public HelpDeskController getController() {
+        return controller;
+    }
+
+    public void atualizarMenu() {
+        if (menuPrincipal != null) {
+            setJMenuBar(null);
+        }
+        menuPrincipal = new MenuPrincipal(controller, this);
+        setJMenuBar(menuPrincipal);
+        revalidate();
+        repaint();
+    }
+
+    public void usuarioLogado() {
+        atualizarMenu();
+        mostrarTickets();
+    }
+
     public void mostrarLogin() {
+        if (menuPrincipal != null) {
+            setJMenuBar(null);
+            menuPrincipal = null;
+        }
         cardLayout.show(mainPanel, "login");
     }
 
@@ -61,6 +92,14 @@ public class HelpDeskUI extends JFrame {
 
     public void mostrarPrioridades() {
         cardLayout.show(mainPanel, "prioridades");
+    }
+
+    public void mostrarDepartamentos() {
+        cardLayout.show(mainPanel, "departamentos");
+    }
+
+    public void mostrarUsuarios() {
+        cardLayout.show(mainPanel, "usuarios");
     }
 
     public static void main(String[] args) {

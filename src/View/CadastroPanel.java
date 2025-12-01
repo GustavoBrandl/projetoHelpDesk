@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import BO.UsuarioBO;
+import java.util.List;
 
 public class CadastroPanel extends JPanel {
     private JTextField usernameField;
@@ -14,11 +14,9 @@ public class CadastroPanel extends JPanel {
     private JButton cadastrarButton;
     private JButton voltarButton;
     private HelpDeskUI mainFrame;
-    private UsuarioBO usuarioBO;
 
     public CadastroPanel(HelpDeskUI mainFrame) {
         this.mainFrame = mainFrame;
-        this.usuarioBO = new UsuarioBO();
         setLayout(new GridBagLayout());
         setBackground(new Color(240, 240, 240));
 
@@ -26,7 +24,6 @@ public class CadastroPanel extends JPanel {
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Título
         JLabel titleLabel = new JLabel("CRIAR NOVA CONTA");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         gbc.gridx = 0;
@@ -34,7 +31,6 @@ public class CadastroPanel extends JPanel {
         gbc.gridwidth = 2;
         add(titleLabel, gbc);
 
-        // Username
         gbc.gridwidth = 1;
         gbc.gridy = 1;
         gbc.gridx = 0;
@@ -44,7 +40,6 @@ public class CadastroPanel extends JPanel {
         usernameField = new JTextField(20);
         add(usernameField, gbc);
 
-        // Email
         gbc.gridx = 0;
         gbc.gridy = 2;
         JLabel emailLabel = new JLabel("Email:");
@@ -53,7 +48,6 @@ public class CadastroPanel extends JPanel {
         emailField = new JTextField(20);
         add(emailField, gbc);
 
-        // Senha
         gbc.gridx = 0;
         gbc.gridy = 3;
         JLabel passwordLabel = new JLabel("Senha:");
@@ -62,7 +56,6 @@ public class CadastroPanel extends JPanel {
         passwordField = new JPasswordField(20);
         add(passwordField, gbc);
 
-        // Telefone
         gbc.gridx = 0;
         gbc.gridy = 4;
         JLabel telefoneLabel = new JLabel("Telefone:");
@@ -71,7 +64,6 @@ public class CadastroPanel extends JPanel {
         telefoneField = new JTextField(20);
         add(telefoneField, gbc);
 
-        // Botão Cadastrar
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.gridwidth = 2;
@@ -82,7 +74,6 @@ public class CadastroPanel extends JPanel {
         cadastrarButton.setFocusPainted(false);
         add(cadastrarButton, gbc);
 
-        // Botão Voltar
         gbc.gridy = 6;
         voltarButton = new JButton("VOLTAR");
         voltarButton.setFont(new Font("Arial", Font.BOLD, 14));
@@ -91,7 +82,6 @@ public class CadastroPanel extends JPanel {
         voltarButton.setFocusPainted(false);
         add(voltarButton, gbc);
 
-        // Ações dos botões
         cadastrarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -120,19 +110,47 @@ public class CadastroPanel extends JPanel {
         }
 
         try {
-            // Criar usuário tipo CLIENTE (tipo 3)
-            if (usuarioBO.criarUsuario(username, email, password, telefone, 3, 1)) {
-                JOptionPane.showMessageDialog(this, "Cadastro realizado com sucesso!\nVocê será redirecionado para login.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            var controller = mainFrame.getController();
+            var usuarioController = controller.getUsuarioController();
+            
+            Integer orgId = usuarioController.criarOuObterOrganizacaoPadrao();
+            
+            if (orgId == null) {
+                JOptionPane.showMessageDialog(this, 
+                    "Erro ao obter organização.", 
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            boolean sucesso = usuarioController.cadastrarUsuario(
+                username, email, password, telefone, 4, orgId
+            );
+
+            if (sucesso) {
+                JOptionPane.showMessageDialog(this, 
+                    "✅ Cadastro realizado!\n\n" +
+                    "Usuário: " + username + "\n" +
+                    "Email: " + email + "\n\n" +
+                    "Use este email para fazer login.", 
+                    "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                
                 limparCampos();
                 mainFrame.mostrarLogin();
+                
             } else {
-                JOptionPane.showMessageDialog(this, "Erro ao realizar cadastro. Tente novamente!", "Erro", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, 
+                    "❌ Erro ao cadastrar.\nEmail já existe?", 
+                    "Erro", JOptionPane.ERROR_MESSAGE);
             }
+            
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao conectar com o banco de dados: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, 
+                "❌ Erro: " + e.getMessage(), 
+                "Erro", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }
-
+    
     private void limparCampos() {
         usernameField.setText("");
         emailField.setText("");

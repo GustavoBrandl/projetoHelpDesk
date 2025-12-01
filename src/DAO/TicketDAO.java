@@ -19,17 +19,16 @@ public class TicketDAO {
         try {
             Connection conn = Conexao.conectar();
             String sql = "INSERT INTO " + NOMEDATABELA + 
-                " (sobre, descricao, dataHoraAbertura, fk_prioridade_ticket, fk_status_ticket, fk_categoria_ticket, fk_solicitante_ticket) " +
-                " VALUES (?, ?, ?, ?, ?, ?, ?)";
+                " (sobre, descricao, fk_prioridade_ticket, fk_status_ticket, fk_categoria_ticket, fk_solicitante_ticket) " +
+                " VALUES (?, ?, ?, ?, ?, ?)";
 
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, ticket.getSobre());
             ps.setString(2, ticket.getDescricao());
-            ps.setTimestamp(3, Timestamp.valueOf(ticket.getDataHoraAbertura()));
-            ps.setInt(4, ticket.getPrioridade().getId());
-            ps.setInt(5, ticket.getStatus().getId());
-            ps.setInt(6, ticket.getCategoria().getId());
-            ps.setInt(7, ticket.getSolicitante().getId());
+            ps.setInt(3, ticket.getPrioridade().getId());
+            ps.setInt(4, ticket.getStatus().getId());
+            ps.setInt(5, ticket.getCategoria().getId());
+            ps.setInt(6, ticket.getSolicitante().getId());
 
             ps.executeUpdate();
             ps.close();

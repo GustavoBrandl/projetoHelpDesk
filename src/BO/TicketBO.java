@@ -3,48 +3,46 @@ package BO;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-
 import DAO.*;
 import DTO.*;
+import Util.PermissaoUtil;
 
 public class TicketBO {
-
     private final TicketDAO ticketDAO = new TicketDAO();
 
-    // ---------------------------------------------------------
-    // ABRIR CHAMADO
-    // ---------------------------------------------------------
-    public boolean abrirChamado(String sobre, String descricao, Integer idCategoria, UsuarioDTO solicitante) {
+    public boolean abrirChamado(String sobre, String descricao, Integer idCategoria, 
+                               Integer idPrioridade, UsuarioDTO solicitante) {
+        
+        if (sobre == null || descricao == null || idCategoria == null || idPrioridade == null) {
+            return false;
+        }
 
-        if (sobre == null || descricao == null || idCategoria == null) {
+        if (!PermissaoUtil.podeCriarTicket(solicitante)) {
             return false;
         }
 
         CategoriaDTO cat = new CategoriaDTO();
         cat.setId(idCategoria);
 
-        PrioridadeDTO prioridadePadrao = new PrioridadeDTO();
-        prioridadePadrao.setId(1); // prioridade padrão
+        PrioridadeDTO prioridade = new PrioridadeDTO();
+        prioridade.setId(idPrioridade);
 
         StatusDTO aberto = new StatusDTO();
-        aberto.setId(1); // ABERTO
+        aberto.setId(1);
 
         TicketDTO ticket = new TicketDTO();
         ticket.setSobre(sobre);
         ticket.setDescricao(descricao);
         ticket.setCategoria(cat);
         ticket.setSolicitante(solicitante);
-        ticket.setPrioridade(prioridadePadrao);
+        ticket.setPrioridade(prioridade);
         ticket.setStatus(aberto);
-        ticket.setDataHoraAbertura(LocalDateTime.now());
 
         return ticketDAO.inserir(ticket);
     }
 
-
     public boolean atenderChamado(Integer idTicket, UsuarioDTO tecnico) {
-
-        if (tecnico.getTipo().ordinal() > 1) {
+        if (!PermissaoUtil.podeAtenderTickets(tecnico)) {
             return false;
         }
 
@@ -61,8 +59,7 @@ public class TicketBO {
     }
 
     public boolean alterarCategoria(Integer idTicket, Integer idCategoria, UsuarioDTO editor) {
-
-        if (editor.getTipo().ordinal() > 1) {
+        if (!PermissaoUtil.podeGerenciarSistema(editor)) {
             return false;
         }
 
@@ -77,10 +74,8 @@ public class TicketBO {
         return ticketDAO.alterar(t);
     }
 
-
     public boolean alterarPrioridade(Integer idTicket, Integer idPrioridade, UsuarioDTO editor) {
-
-        if (editor.getTipo().ordinal() > 1) {
+        if (!PermissaoUtil.podeGerenciarSistema(editor)) {
             return false;
         }
 
@@ -96,8 +91,7 @@ public class TicketBO {
     }
 
     public boolean alterarStatus(Integer idTicket, Integer idStatus, UsuarioDTO editor) {
-
-        if (editor.getTipo().ordinal() > 1) {
+        if (!PermissaoUtil.podeGerenciarSistema(editor)) {
             return false;
         }
 
@@ -113,8 +107,7 @@ public class TicketBO {
     }
 
     public boolean finalizarChamado(Integer idTicket, UsuarioDTO tecnico) {
-
-        if (tecnico.getTipo().ordinal() > 1) {
+        if (!PermissaoUtil.podeAtenderTickets(tecnico)) {
             return false;
         }
 
@@ -145,10 +138,8 @@ public class TicketBO {
         return true;
     }
 
-
     public boolean reabrirChamado(Integer idTicket, UsuarioDTO editor) {
-
-        if (editor.getTipo().ordinal() > 1) {
+        if (!PermissaoUtil.podeGerenciarSistema(editor)) {
             return false;
         }
 
