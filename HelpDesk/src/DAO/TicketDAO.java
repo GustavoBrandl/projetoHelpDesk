@@ -48,7 +48,7 @@ public class TicketDAO {
         try {
             Connection conn = Conexao.conectar();
             
-            // Desabilitar constraint check ANTES de qualquer operação
+
             Statement stmt = conn.createStatement();
             stmt.execute("SET FOREIGN_KEY_CHECKS=0");
             stmt.close();
@@ -102,7 +102,7 @@ public class TicketDAO {
             
             ps.close();
             
-            // Reabilitar constraint check
+
             stmt = conn.createStatement();
             stmt.execute("SET FOREIGN_KEY_CHECKS=1");
             stmt.close();
@@ -113,7 +113,7 @@ public class TicketDAO {
         } catch (com.mysql.jdbc.MysqlDataTruncation e) {
             System.out.println("ERRO TicketDAO.alterar: Data truncation - " + e.getMessage());
             System.out.println("DEBUG: Tentando sem data...");
-            // Retry: executar atualização sem a coluna dataHoraFinalizacao
+
             try {
                 Connection conn2 = Conexao.conectar();
                 StringBuilder sql2 = new StringBuilder("UPDATE " + NOMEDATABELA + " SET ");
@@ -238,7 +238,7 @@ public class TicketDAO {
                 t.setSobre(rs.getString(2));
                 t.setDescricao(rs.getString(3));
                 
-                // Validar dataHoraAbertura
+
                 Timestamp abertura = rs.getTimestamp(4);
                 if (abertura != null) {
                     try {
@@ -248,13 +248,13 @@ public class TicketDAO {
                     }
                 }
 
-                // Validar dataHoraFinalizacao
+
                 Timestamp fim = rs.getTimestamp(5);
                 if (fim != null) {
                     try {
                         t.setDataHoraFinalizacao(fim.toLocalDateTime());
                     } catch (Exception e) {
-                        // Deixa nulo se inválido
+
                     }
                 }
 
@@ -310,3 +310,5 @@ public class TicketDAO {
     }
 
 }
+
+

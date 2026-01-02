@@ -11,7 +11,7 @@ public class ContratoBO {
 	private ContratoDAO dao = new ContratoDAO();
 
 	public boolean inserir(ContratoDTO contrato) {
-		// Validações
+
 		if (contrato.getOrganizacaoId() == null || contrato.getOrganizacaoId() <= 0) {
 			System.out.println("Erro: Organização inválida");
 			return false;
@@ -87,3 +87,5 @@ public class ContratoBO {
 		return dao.pesquisarAtivoOrganizacao(organizacaoId, mes);
 	}
 }
+
+

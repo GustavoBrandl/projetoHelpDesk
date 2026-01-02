@@ -15,7 +15,7 @@ public class OrganizacaoController {
         return organizacaoBO.inserir(organizacao);
     }
 
-    // Compatibilidade: versão antiga usada pelas Views
+
     public boolean criarOrganizacao(String nome, String dominio) {
         OrganizacaoDTO dto = new OrganizacaoDTO();
         dto.setNome(nome);
@@ -27,7 +27,7 @@ public class OrganizacaoController {
         return organizacaoBO.alterar(organizacao);
     }
 
-    // Compatibilidade
+
     public boolean alterarOrganizacao(int id, String nome, String dominio) {
         OrganizacaoDTO dto = new OrganizacaoDTO();
         dto.setId(id);
@@ -40,7 +40,7 @@ public class OrganizacaoController {
         return organizacaoBO.pesquisarTodos();
     }
 
-    // Compatibilidade
+
     public List<OrganizacaoDTO> listarOrganizacoes() {
         return pesquisarTodos();
     }
@@ -49,7 +49,7 @@ public class OrganizacaoController {
         return organizacaoBO.excluir(organizacao);
     }
 
-    // Backwards-compatible convenience methods used by Views
+
     public boolean inserir(String nome, String dominio) {
         OrganizacaoDTO o = new OrganizacaoDTO();
         o.setNome(nome);
@@ -65,3 +65,4 @@ public class OrganizacaoController {
         return alterar(o);
     }
 }
+

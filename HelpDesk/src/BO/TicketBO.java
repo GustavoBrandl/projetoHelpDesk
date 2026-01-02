@@ -124,12 +124,12 @@ public class TicketBO {
 
         TicketDTO chamado = buscarPorId(idTicket);
         if (chamado != null) {
-            // Se tempo não foi informado, calcular baseado na data de abertura
+
             if (tempoEmHoras == null && chamado.getDataHoraAbertura() != null) {
                 double horas = ChronoUnit.MINUTES.between(chamado.getDataHoraAbertura(), agora) / 60.0;
                 t.setTempoChamado(horas);
             } else if (tempoEmHoras != null) {
-                // Se tempo foi informado, usar esse valor
+
                 t.setTempoChamado(tempoEmHoras);
             } else {
                 t.setTempoChamado(0.0);
@@ -190,3 +190,4 @@ public class TicketBO {
         return statusDAO.pesquisarTodos();
     }
 }
+

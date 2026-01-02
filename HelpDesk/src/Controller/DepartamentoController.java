@@ -15,7 +15,7 @@ public class DepartamentoController {
         return departamentoBO.inserir(departamento);
     }
     
-    // Compatibilidade com chamadas antigas das Views
+
     public boolean inserir(String nome) {
         DepartamentoDTO dto = new DepartamentoDTO();
         dto.setNome(nome);
@@ -26,7 +26,7 @@ public class DepartamentoController {
         return departamentoBO.alterar(departamento);
     }
     
-    // Compatibilidade com chamadas antigas das Views
+
     public boolean alterar(Integer id, String nome) {
         DepartamentoDTO dto = new DepartamentoDTO();
         dto.setId(id);
@@ -38,7 +38,7 @@ public class DepartamentoController {
         return departamentoBO.pesquisarTodos();
     }
     
-    // Compatibilidade
+
     public List<DepartamentoDTO> listarDepartamentos() {
         return pesquisarTodos();
     }
@@ -47,3 +47,4 @@ public class DepartamentoController {
         return departamentoBO.excluir(departamento);
     }
 }
+

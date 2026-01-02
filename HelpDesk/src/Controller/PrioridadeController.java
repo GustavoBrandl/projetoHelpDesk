@@ -31,3 +31,4 @@ public class PrioridadeController {
         return prioridadeBO.excluir(prioridade);
     }
 }
+

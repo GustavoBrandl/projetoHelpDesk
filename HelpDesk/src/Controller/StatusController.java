@@ -31,3 +31,4 @@ public class StatusController {
         return statusBO.excluir(status);
     }
 }
+

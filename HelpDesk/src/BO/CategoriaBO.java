@@ -32,3 +32,5 @@ public class CategoriaBO {
 		return dao.alterarCategoria(categoria);
 	}
 }
+
+

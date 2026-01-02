@@ -17,7 +17,7 @@ public class CategoriaController {
         return categoriaBO.inserir(categoria);
     }
     
-    // Compatibilidade: versão antiga usada pelas Views
+
     public boolean inserir(String nome, int idDepartamento) {
         CategoriaDTO dto = new CategoriaDTO();
         dto.setNome(nome);
@@ -32,7 +32,7 @@ public class CategoriaController {
         return categoriaBO.alterar(categoria);
     }
 
-    // Compatibilidade: versão antiga usada pelas Views
+
     public boolean alterar(Integer idCategoria, String nome, Integer idDepartamento) {
         CategoriaDTO dto = new CategoriaDTO();
         dto.setId(idCategoria);
@@ -49,7 +49,7 @@ public class CategoriaController {
         return categoriaBO.pesquisarTodos();
     }
 
-    // Compatibilidade
+
     public List<CategoriaDTO> listarCategorias() {
         return pesquisarTodos();
     }
@@ -62,8 +62,9 @@ public class CategoriaController {
         return categoriaBO.excluir(categoria);
     }
 
-    // compatibility wrapper for older Views
+
     public boolean excluirCategoria(CategoriaDTO categoria) {
         return excluir(categoria);
     }
 }
+

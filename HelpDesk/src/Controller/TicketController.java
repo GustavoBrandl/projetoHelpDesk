@@ -77,7 +77,7 @@ public class TicketController {
         return ticketBO.alterarPrioridade(idTicket, idPrioridade, editor);
     }
     
-    // Wrappers retained for Views compatibility
+
     public List<StatusDTO> pesquisarStatus() {
         return ticketBO.listarStatus();
     }
@@ -106,3 +106,4 @@ public class TicketController {
         return ticketBO.alterarStatus(idTicket, idStatus, editor);
     }
 }
+

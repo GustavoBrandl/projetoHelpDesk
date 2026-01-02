@@ -38,3 +38,4 @@ public class ContratoController {
         return contratoBO.pesquisarAtivoOrganizacao(organizacaoId, mes);
     }
 }
+

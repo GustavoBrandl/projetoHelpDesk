@@ -31,7 +31,7 @@ public class OrganizacaoBO {
         return dao.pesquisarTodos();
     }
 
-    // Compatibilidade: criar organização por nome/dominio (usado em algumas Views)
+
     public boolean inserir(String nome, String dominio) {
         OrganizacaoDTO dto = new OrganizacaoDTO();
         dto.setNome(nome);
@@ -39,3 +39,5 @@ public class OrganizacaoBO {
         return inserir(dto);
     }
 }
+
+

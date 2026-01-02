@@ -29,3 +29,5 @@ public enum TipoUsuario {
         throw new IllegalArgumentException("TipoUsuario inválido: " + id);
     }
 }
+
+

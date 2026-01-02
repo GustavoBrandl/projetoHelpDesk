@@ -97,7 +97,6 @@ public class TicketDTO {
 		this.atendente = atendente;
 	}
 	
-	// Alias para compatibilidade
 	public UsuarioDTO getTecnico() {
 		return atendente;
 	}
@@ -140,3 +139,5 @@ public class TicketDTO {
 	
 	
 }
+
+

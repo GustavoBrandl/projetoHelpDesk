@@ -8,11 +8,11 @@ public class Conexao {
 	final static String NOME_DO_BANCO = "helpdesk";
     public static Connection conectar() {
     	try {
-    		// Tenta carregara driver MySQL (versão antiga)
+
     		try {
     			Class.forName("com.mysql.jdbc.Driver");
     		} catch (ClassNotFoundException e1) {
-    			// Tenta o driver mais recente
+
     			try {
     				Class.forName("com.mysql.cj.jdbc.Driver");
     			} catch (ClassNotFoundException e2) {
@@ -40,3 +40,4 @@ public class Conexao {
         }
     }
 }
+

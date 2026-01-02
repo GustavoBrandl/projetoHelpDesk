@@ -56,3 +56,4 @@ public class UsuarioController {
         return usuarioBO.ativarDesativar(id);
     }
 }
+
